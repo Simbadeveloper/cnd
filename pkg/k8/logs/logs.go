@@ -24,7 +24,9 @@ func StreamLogs(d *appsv1.Deployment, container string, c *kubernetes.Clientset,
 	signal.Notify(channel, os.Interrupt)
 	go func() {
 		<-channel
-		readCloser.Close()
+		if readCloser != nil {
+			readCloser.Close()
+		}
 		end = true
 	}()
 
@@ -58,6 +60,7 @@ func StreamLogs(d *appsv1.Deployment, container string, c *kubernetes.Clientset,
 		}
 		wait = 0
 		io.Copy(os.Stdout, readCloser)
+		readCloser = nil
 	}
 	return
 }
